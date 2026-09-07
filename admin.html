@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>لوحة أدمن — مطعم الغلبان</title>
+<style>
+.admin-manager{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    margin-right:12px;
+    padding:7px 14px;
+    border-radius:20px;
+    background:rgba(255,180,0,.10);
+    border:1px solid rgba(255,180,0,.25);
+    color:#ffe08a;
+    font-size:15px;
+    vertical-align:middle;
+    box-shadow:0 0 12px rgba(255,160,0,.08);
+}
+
+.admin-manager strong{
+    color:#ffd33d;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:Tahoma,Arial,sans-serif;background:#080402;color:#fff}
+body{padding:25px;background:
+radial-gradient(circle at 50% 0%,#492504 0%,#170b03 38%,#050303 85%)}
+button,input{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+.login-wrap{min-height:calc(100vh - 50px);display:flex;align-items:center;justify-content:center}
+.login-box,.panel{
+width:min(1100px,96vw);background:linear-gradient(145deg,#241205,#0b0704);
+border:1px solid rgba(255,174,30,.4);border-radius:28px;
+box-shadow:0 15px 50px rgba(0,0,0,.65),0 0 35px rgba(255,150,0,.12)
+}
+.login-box{width:min(420px,94vw);padding:35px;text-align:center}
+h1,h2{color:#ffc52e;text-shadow:0 0 18px rgba(255,160,0,.5)}
+.login-box h1{font-size:34px;margin-bottom:10px}
+.login-box p{color:#ffe4ae;line-height:1.8;margin-bottom:22px}
+input{
+width:100%;height:52px;border:1px solid #a76a14;border-radius:26px;
+background:#080402;color:#fff;text-align:center;padding:0 18px;outline:none
+}
+input:focus{border-color:#ffc52e;box-shadow:0 0 15px rgba(255,180,0,.25)}
+.btn{
+border:0;border-radius:25px;padding:12px 20px;font-weight:bold;
+background:linear-gradient(135deg,#ffe36b,#ff9a00);color:#321900
+}
+.btn.secondary{background:#100903;color:#ffe4a0;border:1px solid #8c641f}
+.btn.danger{background:linear-gradient(135deg,#ff7777,#bd2020);color:#fff}
+.btn.green{background:linear-gradient(135deg,#a8ff75,#43b52b);color:#102009}
+.full{width:100%;margin-top:15px}
+.error{color:#ff8b8b;min-height:25px;margin-top:12px}
+
+.dashboard{max-width:1100px;margin:auto}
+.topbar{
+display:flex;gap:12px;align-items:center;justify-content:space-between;
+margin-bottom:20px;flex-wrap:wrap
+}
+.topbar h1{font-size:34px}
+.status{color:#9cff70;font-size:14px}
+
+.stats{
+display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px
+}
+.card{
+padding:20px;border:1px solid rgba(255,174,30,.35);border-radius:22px;
+background:rgba(10,5,2,.72);text-align:center
+}
+.card .icon{font-size:34px}
+.card h3{color:#ffe5a3;font-size:15px;margin:8px 0}
+.value{font-size:28px;color:#ffd33d;font-weight:bold}
+
+.grid{
+display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px
+}
+.panel{padding:22px}
+.panel h2{font-size:23px;margin-bottom:18px}
+.control-row{
+display:grid;grid-template-columns:1fr 130px auto;gap:10px;align-items:center;
+padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08)
+}
+.control-row:last-child{border-bottom:0}
+.food-name{font-weight:bold;color:#fff}
+.small{font-size:12px;color:#cdb98f}
+.number{height:42px!important;border-radius:21px!important}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.notice{
+padding:12px 15px;border-radius:15px;background:rgba(255,180,0,.08);
+border:1px solid rgba(255,180,0,.2);color:#ffe4ae;line-height:1.8
+}
+.player-box p{margin:9px 0;color:#ffe4ae}
+.player-box strong{color:#ffd33d}
+.footer{margin-top:20px;text-align:center;color:#8f7a5b;font-size:12px;line-height:1.8}
+
+@media(max-width:800px){
+.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+body{padding:12px}
+.stats{grid-template-columns:1fr 1fr}
+.control-row{grid-template-columns:1fr 95px}
+.control-row .save-price{grid-column:1/-1}
+.topbar h1{font-size:27px}
+}
+
+/* ===== تحسينات تنظيم لوحة الأدمن ===== */
+.dashboard{max-width:1180px}
+.section-title{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.section-title .badge{margin-right:auto;font-size:11px;color:#ffda78;background:rgba(255,180,0,.09);border:1px solid rgba(255,180,0,.2);padding:5px 10px;border-radius:20px}
+.panel{position:relative;overflow:hidden}
+.panel::before{content:"";position:absolute;top:0;right:0;left:0;height:2px;background:linear-gradient(90deg,transparent,#ffb51b,transparent);opacity:.7}
+.price-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.price-search{max-width:260px;height:42px!important;border-radius:21px!important;text-align:right}
+.price-list{display:grid;gap:8px}
+.control-row{grid-template-columns:minmax(0,1fr) 135px 78px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:11px 12px;margin-bottom:8px}
+.control-row:last-child{margin-bottom:0}
+.food-name{font-size:15px}
+.price-input-wrap{position:relative}
+.price-input-wrap::after{content:'ج';position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#b99862;font-size:12px;pointer-events:none}
+.price-input{padding-left:32px!important}
+.save-price{padding:9px 12px!important;border-radius:18px!important}
+.quick-price{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.quick-price button{font-size:12px;padding:8px 11px;border-radius:18px}
+.stat-note{font-size:11px;color:#9d8b6b;margin-top:4px}
+.group-divider{height:1px;background:rgba(255,255,255,.07);margin:4px 0 14px}
+@media(max-width:500px){.control-row{grid-template-columns:1fr 105px 68px}.price-search{max-width:none;width:100%}}
+
+
+/* ===== قسم آراء الزوار ===== */
+.feedback-panel{grid-column:1/-1}
+.feedback-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+}
+.feedback-count{
+    color:#ffd33d;
+    font-weight:bold;
+}
+.feedback-list{
+    display:grid;
+    gap:10px;
+    max-height:560px;
+    overflow:auto;
+    padding-left:2px;
+}
+.feedback-item{
+    display:grid;
+    grid-template-columns:52px minmax(0,1fr) auto;
+    gap:12px;
+    align-items:start;
+    padding:14px;
+    border:1px solid rgba(255,174,30,.16);
+    border-radius:18px;
+    background:rgba(255,255,255,.025);
+}
+.feedback-avatar{
+    width:44px;height:44px;
+    display:grid;place-items:center;
+    border-radius:50%;
+    background:rgba(255,180,0,.1);
+    border:1px solid rgba(255,180,0,.2);
+    font-size:22px;
+}
+.feedback-name{
+    color:#ffd33d;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+.feedback-message{
+    color:#fff1ce;
+    line-height:1.8;
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+.feedback-time{
+    color:#8f7a5b;
+    font-size:11px;
+    white-space:nowrap;
+}
+.feedback-empty{
+    text-align:center;
+    padding:35px 15px;
+    color:#a9936e;
+    border:1px dashed rgba(255,174,30,.2);
+    border-radius:18px;
+}
+.feedback-clear{
+    margin-top:12px;
+}
+@media(max-width:650px){
+    .feedback-item{grid-template-columns:42px minmax(0,1fr)}
+    .feedback-time{grid-column:2;white-space:normal}
+}
+
+
+/* ===== تقييمات ورسائل الزوار ===== */
+.feedback-rating{
+    margin:5px 0 8px;
+    color:#ffd12f;
+    font-size:20px;
+    letter-spacing:2px;
+}
+.feedback-location-admin{
+    margin-top:7px;
+    color:#a9936e;
+    font-size:11px;
+    line-height:1.7;
+}
+.feedback-location-admin a{
+    color:#ffd66e;
+    text-decoration:none;
+}
+.feedback-location-admin a:hover{text-decoration:underline}
+.feedback-summary{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.average-rating{
+    color:#ffd12f;
+    font-size:14px;
+    font-weight:bold;
+}
+
+
+.user-sidebar{
+    position:fixed;top:25px;right:25px;width:270px;height:calc(100vh - 50px);z-index:100;
+    padding:18px;background:linear-gradient(145deg,#241205,#0b0704);border:1px solid rgba(255,174,30,.4);
+    border-radius:25px;box-shadow:0 15px 50px rgba(0,0,0,.65),0 0 35px rgba(255,150,0,.12);overflow:hidden;display:flex;flex-direction:column
+}
+.user-sidebar h2{font-size:20px;margin-bottom:12px}
+.user-search{height:42px!important;border-radius:21px!important;text-align:right;margin-bottom:12px}
+.users-list{overflow:auto;display:grid;gap:8px;padding:2px}
+.user-item{border:1px solid rgba(255,174,30,.16);background:rgba(255,255,255,.025);border-radius:16px;padding:11px 12px;text-align:right;color:#fff;cursor:pointer;transition:.2s}
+.user-item:hover{border-color:#ffc52e;transform:translateX(-2px)}
+.user-item.active{border-color:#ffc52e;background:rgba(255,180,0,.12);box-shadow:0 0 18px rgba(255,160,0,.12)}
+.user-item-name{font-weight:bold;color:#ffd33d;font-size:15px}
+.user-item-meta{font-size:11px;color:#a9936e;margin-top:4px}
+.user-empty{padding:20px 10px;text-align:center;color:#a9936e;border:1px dashed rgba(255,174,30,.2);border-radius:15px}
+.dashboard{max-width:1180px;margin:0 300px 0 auto}
+.selected-user-panel{margin-bottom:20px}
+.selected-user-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.selected-user-name{font-size:24px;color:#ffd33d;font-weight:bold}
+.message-box textarea{width:100%;min-height:110px;resize:vertical;border:1px solid #8d5b16;border-radius:18px;background:#080402;color:#fff;padding:14px;outline:none;font:inherit;line-height:1.7}
+.message-box textarea:focus{border-color:#ffc52e;box-shadow:0 0 15px rgba(255,180,0,.25)}
+.selected-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.selected-tools input,.selected-tools select{height:48px;border:1px solid #a76a14;border-radius:24px;background:#080402;color:#fff;text-align:center;padding:0 14px;outline:none}
+.selected-tools button{min-height:48px}
+@media(max-width:900px){
+    .user-sidebar{position:relative;top:auto;right:auto;width:100%;height:auto;max-height:330px;margin-bottom:18px}
+    .dashboard{max-width:1180px;margin:auto}
+}
+@media(max-width:500px){
+    .selected-tools{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+
+<div id="login" class="login-wrap">
+    <div class="login-box">
+        <div style="font-size:60px">🔐</div>
+        <h1>لوحة أدمن مطعم الغلبان</h1>
+        <p>هذه الصفحة منفصلة عن صفحة المطعم.<br>أدخل رمز الأدمن للمتابعة.</p>
+        <input id="adminCode" type="password" placeholder="رمز الأدمن" autocomplete="off">
+        <button class="btn full" onclick="login()">دخول لوحة التحكم</button>
+        <div id="loginError" class="error"></div>
+        
+    </div>
+</div>
+
+<div id="dashboard" class="dashboard hidden">
+    <aside class="user-sidebar">
+        <h2>👥 مستخدمو الموقع</h2>
+        <input id="userSearch" class="user-search" type="search" placeholder="🔎 ابحث عن مستخدم..." oninput="renderUsers()">
+        <div id="usersList" class="users-list"></div>
+    </aside>
+
+    <div class="topbar">
+        <div>
+            <h1>
+    👑 لوحة تحكم الأدمن
+    <span class="admin-manager">👤 صاحب المطعم: <strong>عزالدين</strong></span>
+</h1>
+            <div class="status">● متصل — تحديث تلقائي للبيانات كل ثانية</div>
+        </div>
+        <div class="actions">
+            <button class="btn secondary" onclick="location.href='ghalban.html'">🍽️ المطعم</button>
+            <button class="btn danger" onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </div>
+
+    <section class="panel selected-user-panel">
+        <div class="selected-user-head">
+            <div>
+                <div class="small">المستخدم المحدد</div>
+                <div class="selected-user-name" id="selectedUserName">—</div>
+            </div>
+            <div class="badge" id="selectedUserStatus">اختر مستخدماً من القائمة</div>
+        </div>
+        <div class="selected-tools">
+            <input id="selectedMoney" type="number" min="0" placeholder="الرصيد الجديد">
+            <button class="btn" onclick="setSelectedMoney()">💰 حفظ الرصيد</button>
+            <input id="selectedFree" type="number" min="0" placeholder="الوجبات المجانية">
+            <button class="btn green" onclick="setSelectedFree()">🎁 حفظ العرض</button>
+            <select id="selectedOffer" onchange="toggleCustomOfferInput()">
+                <option value="free">🎁 وجبات مجانية</option>
+                <option value="money">500 جنيه</option>
+                <option value="none">بدون عرض</option>
+            </select>
+            <input id="customOfferFree" type="number" min="1" placeholder="عدد الوجبات المجانية">
+            <button class="btn green" onclick="giveCustomFreeOffer()">🎁 إعطاء العدد المحدد</button>
+            <button class="btn secondary" onclick="setSelectedOffer()">🎟️ تغيير نوع العرض</button>
+            <button id="banUserBtn" class="btn danger" onclick="toggleBanSelectedUser()">🚫 حظر المستخدم</button>
+        </div>
+        <div class="message-box" style="margin-top:14px">
+            <textarea id="userMessage" placeholder="اكتب رسالة تريد إرسالها للمستخدم المحدد..."></textarea>
+            <button class="btn full" onclick="sendUserMessage()">✉️ إرسال رسالة للمستخدم</button>
+            <div class="small" style="margin-top:8px;text-align:center">📩 ستصل الرسالة للمستخدم كزر إشعار في زاوية الصفحة</div>
+        </div>
+    </section>
+
+    <div class="stats">
+        <div class="card">
+            <div class="icon">👤</div>
+            <h3>اسم اللاعب الحالي</h3>
+            <div class="value" id="playerName">—</div><div class="stat-note">البيانات الحالية</div>
+        </div>
+        <div class="card">
+            <div class="icon">💰</div>
+            <h3>الرصيد</h3>
+            <div class="value"><span id="money">0</span> ج</div><div class="stat-note">قابل للتعديل من الأسفل</div>
+        </div>
+        <div class="card">
+            <div class="icon">🎁</div>
+            <h3>الوجبات المجانية</h3>
+            <div class="value" id="freeFood">0</div><div class="stat-note">وجبة متبقية</div>
+        </div>
+        <div class="card">
+            <div class="icon">🪙</div>
+            <h3>حالة القرعة</h3>
+            <div class="value" id="lotteryStatus">—</div><div class="stat-note">كل 3 ساعات</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <section class="panel">
+            <h2>💰 التحكم في الرصيد</h2>
+            <div class="notice">اكتب المبلغ الجديد مباشرة، أو استخدم أزرار الإضافة والخصم.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px">
+                <input id="moneyInput" class="number" type="number" min="0" placeholder="الرصيد الجديد">
+                <button class="btn" onclick="setMoney()">حفظ الرصيد</button>
+            </div>
+            <div class="actions" style="margin-top:12px">
+                <button class="btn green" onclick="changeMoney(100)">+100 جنيه</button>
+                <button class="btn green" onclick="changeMoney(500)">+500 جنيه</button>
+                <button class="btn danger" onclick="changeMoney(-100)">-100 جنيه</button>
+                <button class="btn danger" onclick="changeMoney(-500)">-500 جنيه</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>🎁 الوجبات المجانية</h2>
+            <div class="notice">يمكنك تغيير العدد المتبقي من الوجبات المجانية مباشرة.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px">
+                <input id="freeFoodInput" class="number" type="number" min="0" placeholder="العدد">
+                <button class="btn" onclick="setFreeFood()">حفظ العدد</button>
+            </div>
+            <div class="actions" style="margin-top:12px">
+                <button class="btn green" onclick="changeFreeFood(1)">+1</button>
+                <button class="btn green" onclick="changeFreeFood(10)">+10</button>
+                <button class="btn danger" onclick="changeFreeFood(-1)">-1</button>
+                <button class="btn danger" onclick="changeFreeFood(-10)">-10</button>
+            </div>
+        </section>
+
+        <section class="panel" style="grid-column:1/-1">
+            <div class="section-title">
+                <h2 style="margin-bottom:0">🍽️ إدارة أسعار الوجبات</h2>
+                <span class="badge">تُحفظ فوراً في صفحة المطعم</span>
+            </div>
+            <div class="notice" style="margin-bottom:14px">غيّر سعر أي وجبة ثم اضغط «حفظ». السعر الجديد يظهر في صفحة المطعم ويُستخدم عند الشراء.</div>
+            <div class="price-toolbar">
+                <input id="priceSearch" class="price-search" type="search" placeholder="🔎 ابحث عن وجبة..." oninput="filterPrices()">
+                <button class="btn secondary" onclick="resetPrices()">↩️ الأسعار الأصلية</button>
+            </div>
+            <div class="price-list" id="prices"></div>
+        </section>
+
+
+        <section class="panel feedback-panel">
+            <div class="section-title">
+                <h2 style="margin-bottom:0">💬 آراء ورسائل الزوار</h2>
+                <span class="badge"><span id="feedbackCount">0</span> رسالة</span>
+            </div>
+
+            <div class="notice" style="margin-bottom:14px">
+                الرسائل التي يرسلها الزوار من الصفحة الرئيسية تظهر هنا مع اسم المستخدم ووقت الإرسال.
+            </div>
+
+            <div class="feedback-toolbar">
+                <div class="feedback-summary">
+                    <div class="small">📨 آخر الرسائل تظهر في الأعلى وتُحدّث تلقائياً.</div>
+                    <div id="averageRating" class="average-rating">⭐ متوسط التقييم: —</div>
+                </div>
+                <button class="btn danger" onclick="clearFeedbacks()">🗑️ حذف جميع الرسائل</button>
+            </div>
+
+            <div id="feedbackList" class="feedback-list"></div>
+        </section>
+
+        <section class="panel player-box">
+            <h2>👤 بيانات اللاعب</h2>
+            <p>الاسم: <strong id="detailName">—</strong></p>
+            <p>نوع العرض: <strong id="offerType">—</strong></p>
+            <p>العرض الأول: <strong id="firstOffer">—</strong></p>
+            <p>بدأ عرض الوجبات: <strong id="freeStarted">—</strong></p>
+            <p>آخر استخدام للقرعة: <strong id="lotteryLast">—</strong></p>
+            <div class="notice" style="margin-top:15px">
+                ⚠️ هذه النسخة تعمل على localStorage؛ لذلك البيانات التي تراها هنا هي بيانات
+                نفس المتصفح/النطاق، وليست قاعدة بيانات لجميع الزوار.
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>🧰 أدوات الإدارة</h2>
+            <div class="actions">
+                <button class="btn secondary" onclick="clearLottery()">🔄 تصفير مؤقت القرعة</button>
+                <button class="btn secondary" onclick="giveStarterFree()">🎁 إعطاء 20 وجبة</button>
+                <button class="btn secondary" onclick="giveStarterMoney()">💵 إعطاء 500 جنيه</button>
+                <button class="btn danger" onclick="resetPlayer()">⚠️ إعادة ضبط بيانات اللاعب</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>🔄 تحديث</h2>
+            <div class="notice">
+                البيانات تتحدث تلقائياً كل ثانية. إذا عدّلت الرصيد أو الوجبات من صفحة المطعم،
+                ستظهر التغييرات هنا.
+            </div>
+            <button class="btn full" onclick="refresh()">تحديث الآن</button>
+        </section>
+    </div>
+
+    <div class="footer">
+        مطعم الغلبان ❤️ — لوحة الأدمن الخارجية<br>
+        ملاحظة: حماية كلمة المرور هنا حماية واجهة فقط، وليست حماية خادمية حقيقية.
+    </div>
+</div>
+
+<script>
+const ADMIN_CODE="ezz010ezz#";
+
+let selectedUserId=localStorage.getItem("trikers_admin_selected_user")||"";
+
+function getUsers(){
+    try{
+        const list=JSON.parse(localStorage.getItem("trikers_users")||"[]");
+        return Array.isArray(list)?list:[];
+    }catch(e){return []}
+}
+
+function userKey(id,name){
+    return "trikers_user_"+id+"_"+name;
+}
+
+function ensureLegacyUser(){
+    const name=localStorage.getItem("trikers_player_name");
+    if(!name)return;
+    let users=getUsers();
+    if(users.some(u=>u.name===name))return;
+    const id="legacy_"+btoa(unescape(encodeURIComponent(name))).replace(/[^a-zA-Z0-9]/g,"").slice(0,20);
+    const user={id,name,lastSeen:Date.now()};
+    users.push(user);
+    localStorage.setItem("trikers_users",JSON.stringify(users));
+}
+
+function getSelectedUser(){
+    const users=getUsers();
+    let user=users.find(u=>u.id===selectedUserId);
+    if(!user && users.length){user=users[0];selectedUserId=user.id;localStorage.setItem("trikers_admin_selected_user",selectedUserId)}
+    return user||null;
+}
+
+function selectUser(id){
+    selectedUserId=id;
+    localStorage.setItem("trikers_admin_selected_user",id);
+    refresh();
+    renderUsers();
+}
+
+function renderUsers(){
+    const box=document.getElementById("usersList");
+    if(!box)return;
+    const q=(document.getElementById("userSearch").value||"").trim().toLowerCase();
+    const users=getUsers().filter(u=>!q||String(u.name||"").toLowerCase().includes(q));
+    if(!users.length){box.innerHTML='<div class="user-empty">👤 لا يوجد مستخدمون مسجلون حتى الآن</div>';return;}
+    box.innerHTML=users.map(u=>{
+        const active=u.id===selectedUserId?" active":"";
+        const last=u.lastSeen?new Date(u.lastSeen).toLocaleString("ar-EG") : "غير معروف";
+        const banned=!!u.banned;
+        return `<div class="user-item${active}${banned?" banned":""}" onclick="selectUser('${String(u.id).replace(/'/g,"\'")}')"><div class="user-item-name">👤 ${escapeHtml(u.name||"مستخدم")}</div><div class="user-item-meta">آخر ظهور: ${last}</div>${banned?'<div class="user-item-banned">🚫 محظور</div>':""}</div>`;
+    }).join("");
+}
+
+function sendUserMessage(){
+    const user=getSelectedUser();
+    const input=document.getElementById("userMessage");
+    const text=input.value.trim();
+    if(!user){showToast("اختر مستخدماً أولاً");return;}
+    if(!text){input.focus();return;}
+    const key="trikers_messages_"+user.id;
+    let messages=[];
+    try{messages=JSON.parse(localStorage.getItem(key)||"[]");if(!Array.isArray(messages))messages=[];}catch(e){}
+    messages.push({id:Date.now()+"_"+Math.random().toString(36).slice(2,7),text,time:new Date().toISOString(),read:false});
+    localStorage.setItem(key,JSON.stringify(messages));
+    input.value="";
+    showToast("تم إرسال الرسالة إلى "+user.name+" ✓");
+}
+
+function toggleCustomOfferInput(){
+    const select=document.getElementById("selectedOffer");
+    const input=document.getElementById("customOfferFree");
+    if(!select||!input)return;
+    input.classList.toggle("show",select.value==="free");
+}
+
+function giveCustomFreeOffer(){
+    const user=getSelectedUser();
+    if(!user){showToast("اختر مستخدماً أولاً");return;}
+    const input=document.getElementById("customOfferFree");
+    const value=Math.floor(Number(input.value)||0);
+    if(value<1){showToast("اكتب عدد الوجبات أولاً");return;}
+    localStorage.setItem(userKey(user.id,"free_food"),String(value));
+    localStorage.setItem(userKey(user.id,"offer_type"),"free");
+    localStorage.setItem(userKey(user.id,"free_food_started"),"true");
+    localStorage.removeItem(userKey(user.id,"first_offer"));
+    refresh();
+    showToast("تم إعطاء "+value+" وجبة مجانية لـ "+user.name+" ✓");
+}
+
+function toggleBanSelectedUser(){
+    const user=getSelectedUser();
+    if(!user){showToast("اختر مستخدماً أولاً");return;}
+    const willBan=!user.banned;
+    if(willBan && !confirm("هل تريد حظر المستخدم «"+user.name+"»؟"))return;
+    const users=getUsers().map(u=>u.id===user.id?{...u,banned:willBan,bannedAt:willBan?Date.now():null}:u);
+    localStorage.setItem("trikers_users",JSON.stringify(users));
+    refresh();
+    showToast(willBan?"تم حظر المستخدم 🚫":"تم فك حظر المستخدم ✓");
+}
+
+function setSelectedMoney(){
+    const user=getSelectedUser();
+    if(!user)return;
+    const value=Math.max(0,Number(document.getElementById("selectedMoney").value)||0);
+    localStorage.setItem(userKey(user.id,"money"),String(value));
+    refresh();
+}
+
+function setSelectedFree(){
+    const user=getSelectedUser();
+    if(!user)return;
+    const value=Math.max(0,Number(document.getElementById("selectedFree").value)||0);
+    localStorage.setItem(userKey(user.id,"free_food"),String(value));
+    localStorage.setItem(userKey(user.id,"free_food_started"),"true");
+    localStorage.setItem(userKey(user.id,"offer_type"),"free");
+    refresh();
+}
+
+function setSelectedOffer(){
+    const user=getSelectedUser();
+    if(!user)return;
+    const value=document.getElementById("selectedOffer").value;
+    if(value==="none"){
+        localStorage.removeItem(userKey(user.id,"offer_type"));
+    }else if(value==="free"){
+        const custom=Math.floor(Number(document.getElementById("customOfferFree").value)||0);
+        const current=Math.floor(Number(localStorage.getItem(userKey(user.id,"free_food")))||0);
+        const count=custom>0?custom:Math.max(1,current);
+        localStorage.setItem(userKey(user.id,"offer_type"),"free");
+        localStorage.setItem(userKey(user.id,"free_food"),String(count));
+        localStorage.setItem(userKey(user.id,"free_food_started"),"true");
+        localStorage.removeItem(userKey(user.id,"first_offer"));
+    }else{
+        localStorage.setItem(userKey(user.id,"offer_type"),value);
+    }
+    refresh();
+}
+
+ensureLegacyUser();
+
+const foods=[
+    ["pizza","🍕 البيتزا",30],
+    ["burger","🍔 البرجر",35],
+    ["fries","🍟 البطاطس",5],
+    ["chicken","🍗 وجبة الدجاج",25],
+    ["taco","🌮 التاكو",15],
+    ["kabsa","🍛 الكبسة",40],
+    ["liver","🥩 الكبدة الإسكندراني",15],
+    ["hawawshi","🥙 حواوشي هاو هاو",10]
+];
+
+function login(){
+    const code=document.getElementById("adminCode").value;
+    if(code===ADMIN_CODE){
+        sessionStorage.setItem("trikers_admin_session","true");
+        showDashboard();
+    }else{
+        document.getElementById("loginError").textContent="❌ رمز الأدمن غير صحيح";
+    }
+}
+
+document.getElementById("adminCode").addEventListener("keydown",e=>{
+    if(e.key==="Enter")login();
+});
+
+function showDashboard(){
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+    renderPrices();
+    renderUsers();
+    refresh();
+}
+
+function logout(){
+    sessionStorage.removeItem("trikers_admin_session");
+    location.reload();
+}
+
+function money(){
+    const user=getSelectedUser();
+    if(user)return Number(localStorage.getItem(userKey(user.id,"money"))||0);
+    return Number(localStorage.getItem("trikers_restaurant_money")||0);
+}
+
+function freeFood(){
+    const user=getSelectedUser();
+    if(user)return Number(localStorage.getItem(userKey(user.id,"free_food"))||0);
+    return Number(localStorage.getItem("trikers_free_food")||0);
+}
+
+
+function getFeedbacks(){
+    try{
+        const list=JSON.parse(localStorage.getItem("trikers_feedbacks")||"[]");
+        return Array.isArray(list)?list:[];
+    }catch(e){
+        return [];
+    }
+}
+
+function renderFeedbacks(){
+    const list=getFeedbacks();
+    const box=document.getElementById("feedbackList");
+    const count=document.getElementById("feedbackCount");
+
+    count.textContent=list.length;
+
+    const rated=list.filter(item=>Number(item.rating)>=1);
+    const average=rated.length
+        ?(rated.reduce((sum,item)=>sum+Number(item.rating),0)/rated.length).toFixed(1)
+        :"—";
+
+    const averageBox=document.getElementById("averageRating");
+    if(averageBox){
+        averageBox.textContent=`⭐ متوسط التقييم: ${average}${average==="—"?"":" / 5"}`;
+    }
+
+    if(!list.length){
+        box.innerHTML='<div class="feedback-empty">📭 لا توجد رسائل حتى الآن.</div>';
+        return;
+    }
+
+    box.innerHTML=list.map(item=>{
+        const name=escapeHtml(item.name||"مستخدم");
+        const message=escapeHtml(item.message||"");
+        const time=item.time
+            ?new Date(item.time).toLocaleString("ar-EG")
+            :"وقت غير معروف";
+
+        const rating=Math.max(0,Math.min(5,Number(item.rating)||0));
+        const stars="★★★★★".split("").map((star,i)=>i<rating?"★":"☆").join("");
+
+        const loc=item.location||{};
+        let locationHtml="📍 الموقع: غير متاح";
+
+        if(Number.isFinite(Number(loc.latitude)) && Number.isFinite(Number(loc.longitude))){
+            const lat=Number(loc.latitude);
+            const lon=Number(loc.longitude);
+            const mapsUrl=`https://www.google.com/maps?q=${lat},${lon}`;
+            locationHtml=`📍 <strong>الموقع:</strong> ${lat}, ${lon} — <a href="${mapsUrl}" target="_blank" rel="noopener">فتح على الخريطة</a>`;
+        }else if(loc.status){
+            locationHtml=`📍 <strong>الموقع:</strong> ${escapeHtml(loc.status)}`;
+        }
+
+        return `
+            <div class="feedback-item">
+                <div class="feedback-avatar">👤</div>
+                <div>
+                    <div class="feedback-name">${name}</div>
+                    <div class="feedback-rating" title="${rating} من 5">${stars}</div>
+                    <div class="feedback-message">${message}</div>
+                    <div class="feedback-location-admin">${locationHtml}</div>
+                </div>
+                <div class="feedback-time">${time}</div>
+            </div>
+        `;
+    }).join("");
+}
+
+function escapeHtml(value){
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+function clearFeedbacks(){
+    if(!getFeedbacks().length)return;
+
+    if(!confirm("هل تريد حذف جميع رسائل وآراء الزوار؟"))return;
+
+    localStorage.removeItem("trikers_feedbacks");
+    renderFeedbacks();
+    showToast("تم حذف جميع الرسائل ✓");
+}
+
+function refresh(){
+    const user=getSelectedUser();
+    const name=user?.name||localStorage.getItem("trikers_player_name")||"—";
+    const m=money();
+    const f=freeFood();
+
+    document.getElementById("playerName").textContent=name;
+    document.getElementById("detailName").textContent=name;
+    document.getElementById("money").textContent=m;
+    document.getElementById("freeFood").textContent=f;
+    document.getElementById("moneyInput").value=m;
+    document.getElementById("freeFoodInput").value=f;
+
+    if(user){
+        document.getElementById("selectedUserName").textContent=name;
+        const status=document.getElementById("selectedUserStatus");
+        status.textContent=user.banned?"🚫 المستخدم محظور":"محدد للتحكم";
+        status.classList.toggle("banned-badge",!!user.banned);
+        document.getElementById("selectedMoney").value=m;
+        document.getElementById("selectedFree").value=f;
+        const offer=localStorage.getItem(userKey(user.id,"offer_type"))||"none";
+        document.getElementById("selectedOffer").value=offer;
+        const customInput=document.getElementById("customOfferFree");
+        if(customInput){
+            customInput.value=f||"";
+            customInput.classList.toggle("show",offer==="free");
+        }
+        const banBtn=document.getElementById("banUserBtn");
+        if(banBtn){
+            banBtn.textContent=user.banned?"🔓 فك حظر المستخدم":"🚫 حظر المستخدم";
+            banBtn.className=user.banned?"btn green":"btn danger";
+        }
+    }else{
+        document.getElementById("selectedUserName").textContent="—";
+        document.getElementById("selectedUserStatus").textContent="لا يوجد مستخدم";
+    }
+
+    const offer=user?localStorage.getItem(userKey(user.id,"offer_type")):localStorage.getItem("trikers_offer_type")||"—";
+    const currentFreeCount=user?Number(localStorage.getItem(userKey(user.id,"free_food"))||0):Number(localStorage.getItem("trikers_free_food")||0);
+    document.getElementById("offerType").textContent=
+        offer==="free"?(currentFreeCount+" وجبة مجانية"):offer==="money"?"500 جنيه":"—";
+
+    document.getElementById("firstOffer").textContent=
+        (user?localStorage.getItem(userKey(user.id,"first_offer")):localStorage.getItem("trikers_first_offer"))==="true"?"تم":"لم يُغلق بعد";
+
+    document.getElementById("freeStarted").textContent=
+        (user?localStorage.getItem(userKey(user.id,"free_food_started")):localStorage.getItem("trikers_free_food_started"))==="true"?"نعم":"لا";
+
+    const last=Number(user?localStorage.getItem(userKey(user.id,"lottery_last")):localStorage.getItem("trikers_lottery_last")||0);
+    document.getElementById("lotteryLast").textContent=last?new Date(last).toLocaleString("ar-EG"):"لم تُستخدم";
+    const ready=!last || Date.now()-last>=3*60*60*1000;
+    document.getElementById("lotteryStatus").textContent=ready?"جاهزة":"مؤجلة";
+    renderUsers();
+    renderFeedbacks();
+}
+function setMoney(){
+    const value=Math.max(0,Number(document.getElementById("moneyInput").value)||0);
+    const user=getSelectedUser();
+    if(user)localStorage.setItem(userKey(user.id,"money"),String(value));
+    else localStorage.setItem("trikers_restaurant_money",String(value));
+    refresh();
+}
+function changeMoney(amount){
+    const value=Math.max(0,money()+amount);
+    const user=getSelectedUser();
+    if(user)localStorage.setItem(userKey(user.id,"money"),String(value));
+    else localStorage.setItem("trikers_restaurant_money",String(value));
+    refresh();
+}
+function setFreeFood(){
+    const value=Math.max(0,Number(document.getElementById("freeFoodInput").value)||0);
+    const user=getSelectedUser();
+    if(user){
+        localStorage.setItem(userKey(user.id,"free_food"),String(value));
+        localStorage.setItem(userKey(user.id,"offer_type"),"free");
+    }else{
+        localStorage.setItem("trikers_free_food",String(value));
+        localStorage.setItem("trikers_offer_type","free");
+    }
+    refresh();
+}
+
+function changeFreeFood(amount){
+    const value=Math.max(0,freeFood()+amount);
+    const user=getSelectedUser();
+    if(user){
+        localStorage.setItem(userKey(user.id,"free_food"),String(value));
+        localStorage.setItem(userKey(user.id,"offer_type"),"free");
+    }else{
+        localStorage.setItem("trikers_free_food",String(value));
+        localStorage.setItem("trikers_offer_type","free");
+    }
+    refresh();
+}
+
+function getPrice(type,def){
+    const v=Number(localStorage.getItem("trikers_price_"+type));
+    return Number.isFinite(v)&&v>=0?v:def;
+}
+
+function renderPrices(){
+    document.getElementById("prices").innerHTML=foods.map(([type,name,def])=>`
+        <div class="control-row" data-food-name="${name.toLowerCase()}">
+            <div>
+                <div class="food-name">${name}</div>
+                <div class="small">السعر الحالي: <strong>${getPrice(type,def)}</strong> جنيه — الأصلي: ${def} جنيه</div>
+            </div>
+            <div class="price-input-wrap">
+                <input id="price_${type}" class="number price-input" type="number" min="0" step="1" value="${getPrice(type,def)}"
+                       onkeydown="if(event.key==='Enter')savePrice('${type}',${def})">
+            </div>
+            <button class="btn save-price" onclick="savePrice('${type}',${def})">حفظ</button>
+        </div>
+    `).join("");
+}
+
+function filterPrices(){
+    const q=(document.getElementById("priceSearch").value||"").trim().toLowerCase();
+    document.querySelectorAll("#prices .control-row").forEach(row=>{
+        row.style.display=!q || row.dataset.foodName.includes(q) ? "grid" : "none";
+    });
+}
+
+function savePrice(type,def){
+    const input=document.getElementById("price_"+type);
+    if(!input)return;
+    const value=Math.max(0,Number(input.value)||0);
+    localStorage.setItem("trikers_price_"+type,String(value));
+    renderPrices();
+    showToast("تم حفظ سعر الوجبة بنجاح ✓");
+}
+
+function showToast(message){
+    let toast=document.getElementById("adminToast");
+    if(!toast){
+        toast=document.createElement("div");
+        toast.id="adminToast";
+        toast.style.cssText="position:fixed;bottom:22px;left:22px;z-index:9999;padding:12px 18px;border-radius:18px;background:#151006;border:1px solid #c48720;color:#ffe8ad;box-shadow:0 10px 30px rgba(0,0,0,.45);font-weight:bold";
+        document.body.appendChild(toast);
+    }
+    toast.textContent=message;
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer=setTimeout(()=>toast.remove(),2200);
+}
+
+function resetPrices(){
+    if(!confirm("هل تريد إعادة جميع الأسعار إلى الأسعار الأصلية؟"))return;
+    foods.forEach(([type])=>localStorage.removeItem("trikers_price_"+type));
+    renderPrices();
+    showToast("تمت إعادة الأسعار الأصلية ✓");
+}
+
+function clearLottery(){
+    const user=getSelectedUser();
+    if(user)localStorage.removeItem(userKey(user.id,"lottery_last"));
+    else localStorage.removeItem("trikers_lottery_last");
+    refresh();
+}
+
+function giveStarterFree(){
+    const user=getSelectedUser();
+    if(user){
+        localStorage.setItem(userKey(user.id,"free_food"),"20");
+        localStorage.setItem(userKey(user.id,"offer_type"),"free");
+        localStorage.setItem(userKey(user.id,"free_food_started"),"true");
+    }else{
+        localStorage.setItem("trikers_free_food","20");
+        localStorage.setItem("trikers_offer_type","free");
+        localStorage.setItem("trikers_free_food_started","true");
+    }
+    refresh();
+}
+
+function giveStarterMoney(){
+    const user=getSelectedUser();
+    const value=money()+500;
+    if(user){
+        localStorage.setItem(userKey(user.id,"money"),String(value));
+        localStorage.setItem(userKey(user.id,"offer_type"),"money");
+        localStorage.setItem(userKey(user.id,"first_offer"),"true");
+    }else{
+        localStorage.setItem("trikers_restaurant_money",String(value));
+        localStorage.setItem("trikers_offer_type","money");
+        localStorage.setItem("trikers_first_offer","true");
+    }
+    refresh();
+}
+
+function resetPlayer(){
+    const user=getSelectedUser();
+    if(!user){showToast("اختر مستخدماً أولاً");return;}
+    if(!confirm("⚠️ سيتم حذف بيانات المستخدم الحالي. هل أنت متأكد؟"))return;
+    ["money","free_food","offer_type","first_offer","free_food_started","lottery_last"].forEach(k=>localStorage.removeItem(userKey(user.id,k)));
+    refresh();
+    showToast("تمت إعادة ضبط بيانات "+user.name+" ✓");
+}
+if(sessionStorage.getItem("trikers_admin_session")==="true"){
+    showDashboard();
+}
+
+setInterval(()=>{
+    if(!document.getElementById("dashboard").classList.contains("hidden")){
+        refresh();
+    }
+},1000);
+
+window.addEventListener("storage",()=>{ refresh(); renderFeedbacks(); });
+</script>
+</body>
+</html>
